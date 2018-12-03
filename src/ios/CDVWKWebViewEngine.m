@@ -929,12 +929,46 @@ static void * KVOContext = &KVOContext;
         [self.webServer stop];
     }
 
+     // hot code push fix
+     if (self.CDV_LOCAL_SERVER == nil) {
+        NSDictionary * settings = self.commandDelegate.settings;
+        //bind to designated hostname or default to localhost
+        NSString *bind = [settings cordovaSettingForKey:@"WKBind"];
+        if(bind == nil){
+            bind = @"localhost";
+        }
+
+        //bind to designated port or default to 8080
+        int portNumber = [settings cordovaFloatSettingForKey:@"WKPort" defaultValue:8080];
+
+        //set the local server name
+        self.CDV_LOCAL_SERVER = [NSString stringWithFormat:@"http://%@:%d", bind, portNumber];
+    }
+   //
+ 
     __block NSString* serverUrl = self.CDV_LOCAL_SERVER;
     if (self.internalConnectionsOnly) {
         [self internalConnectionsGetHandlerForPath:path];
     } else {
         [self.webServer addGETHandlerForBasePath:@"/" directoryPath:path indexFilename:((CDVViewController *)self.viewController).startPage cacheAge:0 allowRangeRequests:YES];
     }
+ 
+    // hot code push fix
+     NSString *codePushUrl =@"(^/var/mobile/|^/Users/)";
+    [self.webServer addHandlerForMethod:@"GET" pathRegex:codePushUrl requestClass:GCDWebServerFileRequest.class asyncProcessBlock:^(__kindof GCDWebServerRequest * _Nonnull request, GCDWebServerCompletionBlock  _Nonnull completionBlock) {
+        
+        NSString *absUrl = [[[request URL] absoluteString] stringByReplacingOccurrencesOfString:serverUrl withString:@""];
+
+        NSRange range = [absUrl rangeOfString:@"?"];
+        if (range.location != NSNotFound) {
+            absUrl = [absUrl substringToIndex:range.location];
+        }
+
+        GCDWebServerFileResponse *response = [GCDWebServerFileResponse responseWithFile:absUrl];
+        completionBlock(response);
+    }];
+    //
+ 
     [self.webServer addHandlerForMethod:@"GET" pathRegex:@"_file_/" requestClass:GCDWebServerFileRequest.class asyncProcessBlock:^(__kindof GCDWebServerRequest * _Nonnull request, GCDWebServerCompletionBlock  _Nonnull completionBlock) {
         NSString *urlToRemove = [serverUrl stringByAppendingString:@"/_file_"];
         NSString *absUrl = [[[request URL] absoluteString] stringByReplacingOccurrencesOfString:urlToRemove withString:@""];

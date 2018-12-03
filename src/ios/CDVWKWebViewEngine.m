@@ -958,7 +958,8 @@ static void * KVOContext = &KVOContext;
     [self.webServer addHandlerForMethod:@"GET" pathRegex:codePushUrl requestClass:GCDWebServerFileRequest.class asyncProcessBlock:^(__kindof GCDWebServerRequest * _Nonnull request, GCDWebServerCompletionBlock  _Nonnull completionBlock) {
         
         NSString *absUrl = [[[request URL] absoluteString] stringByReplacingOccurrencesOfString:serverUrl withString:@""];
-
+        absUrl = [absUrl stringByRemovingPercentEncoding];
+     
         NSRange range = [absUrl rangeOfString:@"?"];
         if (range.location != NSNotFound) {
             absUrl = [absUrl substringToIndex:range.location];
@@ -973,6 +974,8 @@ static void * KVOContext = &KVOContext;
         NSString *urlToRemove = [serverUrl stringByAppendingString:@"/_file_"];
         NSString *absUrl = [[[request URL] absoluteString] stringByReplacingOccurrencesOfString:urlToRemove withString:@""];
 
+        absUrl = [absUrl stringByRemovingPercentEncoding];
+     
         NSRange range = [absUrl rangeOfString:@"?"];
         if (range.location != NSNotFound) {
             absUrl = [absUrl substringToIndex:range.location];

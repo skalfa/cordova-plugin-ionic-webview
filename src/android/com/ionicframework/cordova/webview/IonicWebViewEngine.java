@@ -51,6 +51,14 @@ public class IonicWebViewEngine extends SystemWebViewEngine {
     Log.d(TAG, "Ionic Web View Engine Starting Right Up 3...");
   }
 
+   @Override
+  public void loadUrl(String url, boolean clearNavigationStack) {
+    if (!url.startsWith("file:///android_asset/")) {
+        url = url.replace("file:", "http://localhost:8080/_file_");
+    }
+    super.loadUrl(url, clearNavigationStack);
+  }
+  
   @Override
   public void init(CordovaWebView parentWebView, CordovaInterface cordova, final CordovaWebViewEngine.Client client,
                    CordovaResourceApi resourceApi, PluginManager pluginManager,

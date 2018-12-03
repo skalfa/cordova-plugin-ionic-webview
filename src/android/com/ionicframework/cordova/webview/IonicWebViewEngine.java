@@ -54,7 +54,7 @@ public class IonicWebViewEngine extends SystemWebViewEngine {
    @Override
   public void loadUrl(String url, boolean clearNavigationStack) {
     if (!url.startsWith("file:///android_asset/")) {
-        url = url.replace("file:", "http://localhost:8080/_file_");
+        url = url.replace("file:", CDV_LOCAL_SERVER + "/_file_");
     }
     super.loadUrl(url, clearNavigationStack);
   }
